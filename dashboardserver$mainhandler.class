@@ -1,0 +1,19 @@
+// Source code is decompiled from a .class file using FernFlower decompiler (from Intellij IDEA).
+package backend;
+
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
+import java.io.IOException;
+
+class DashboardServer$MainHandler implements HttpHandler {
+   DashboardServer$MainHandler() {
+   }
+
+   public void handle(HttpExchange var1) throws IOException {
+      String var2 = "<!DOCTYPE html><html><head><title>Social Network</title><style>body{font-family:Arial;background:linear-gradient(135deg,#667eea,#764ba2);margin:0;display:flex;justify-content:center;align-items:center;height:100vh}.welcome{background:white;padding:40px;border-radius:15px;text-align:center;box-shadow:0 8px 16px rgba(0,0,0,0.2)}a{display:inline-block;padding:15px 30px;margin:10px;background:#667eea;color:white;text-decoration:none;border-radius:8px;transition:transform 0.3s}a:hover{transform:translateY(-2px);box-shadow:0 4px 8px rgba(0,0,0,0.2)}</style></head><body><div class='welcome'><h1>Social Network Platform</h1><p>Welcome to your social networking dashboard</p><a href='/dashboard'>View Dashboard</a><a href='/api/friends'>API Data</a></div></body></html>";
+      var1.getResponseHeaders().set("Content-Type", "text/html");
+      var1.sendResponseHeaders(200, (long)var2.getBytes().length);
+      var1.getResponseBody().write(var2.getBytes());
+      var1.getResponseBody().close();
+   }
+}
