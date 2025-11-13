@@ -1,0 +1,60 @@
+// Source code is decompiled from a .class file using FernFlower decompiler (from Intellij IDEA).
+package backend;
+
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+class DashboardServer$FriendsHandler implements HttpHandler {
+   DashboardServer$FriendsHandler() {
+   }
+
+   public void handle(HttpExchange var1) throws IOException {
+      var1.getResponseHeaders().set("Content-Type", "application/json");
+      Map var2 = FriendsService.getAllFriendships();
+      List var3 = FriendsService.getAllUsers();
+      StringBuilder var4 = new StringBuilder("{");
+      var4.append("\"users\":[");
+
+      int var5;
+      for(var5 = 0; var5 < var3.size(); ++var5) {
+         if (var5 > 0) {
+            var4.append(",");
+         }
+
+         var4.append("\"").append((String)var3.get(var5)).append("\"");
+      }
+
+      var4.append("],\"connections\":[");
+      var5 = 0;
+      Iterator var6 = var2.entrySet().iterator();
+
+      while(var6.hasNext()) {
+         Map.Entry var7 = (Map.Entry)var6.next();
+         String var8 = (String)var7.getKey();
+         Iterator var9 = ((Set)var7.getValue()).iterator();
+
+         while(var9.hasNext()) {
+            String var10 = (String)var9.next();
+            if (var8.compareTo(var10) < 0) {
+               if (var5 > 0) {
+                  var4.append(",");
+               }
+
+               var4.append("{\"from\":\"").append(var8).append("\",\"to\":\"").append(var10).append("\"}");
+               ++var5;
+            }
+         }
+      }
+
+      var4.append("]}");
+      String var11 = var4.toString();
+      var1.sendResponseHeaders(200, (long)var11.getBytes().length);
+      var1.getResponseBody().write(var11.getBytes());
+      var1.getResponseBody().close();
+   }
+}
