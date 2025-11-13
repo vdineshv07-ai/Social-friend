@@ -1,0 +1,93 @@
+// Source code is decompiled from a .class file using FernFlower decompiler (from Intellij IDEA).
+package backend;
+
+import com.sun.net.httpserver.HttpServer;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.InetSocketAddress;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Executor;
+
+public class FriendsDashboard {
+   private static String currentUser = "";
+
+   public FriendsDashboard() {
+   }
+
+   public static void main(String[] var0) throws IOException {
+      HttpServer var1 = HttpServer.create(new InetSocketAddress(8080), 0);
+      var1.createContext("/", (var0x) -> {
+         String var1 = "<!DOCTYPE html><html><head><title>Friends Network</title><style>body{font-family:Arial;margin:0;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;justify-content:center;align-items:center;height:100vh}.login-box{background:white;padding:40px;border-radius:15px;box-shadow:0 8px 16px rgba(0,0,0,0.2);text-align:center;width:300px}input{padding:12px;margin:8px;width:90%;border:2px solid #667eea;border-radius:8px;font-size:16px}button{padding:12px 24px;background:#667eea;color:white;border:none;border-radius:8px;cursor:pointer;font-size:16px;width:95%}button:hover{background:#5a67d8}h1{color:#667eea;margin-bottom:30px}</style></head><body><div class='login-box'><h1>Friends Network</h1><form action='/login' method='post'><input type='text' name='username' placeholder='Enter Username' required><button type='submit'>Login</button></form></div></body></html>";
+         var0x.getResponseHeaders().set("Content-Type", "text/html");
+         var0x.sendResponseHeaders(200, (long)var1.getBytes().length);
+         var0x.getResponseBody().write(var1.getBytes());
+         var0x.getResponseBody().close();
+      });
+      var1.createContext("/login", (var0x) -> {
+         if ("POST".equals(var0x.getRequestMethod())) {
+            BufferedReader var1 = new BufferedReader(new InputStreamReader(var0x.getRequestBody()));
+            String var2 = var1.readLine();
+            String var3 = var2.split("=")[1].replace("+", " ");
+            currentUser = var3;
+            String var4 = "<!DOCTYPE html><html><head><title>Dashboard</title><style>body{font-family:Arial;margin:0;background:#f0f2f5}.header{background:#667eea;color:white;padding:20px;text-align:center}.container{max-width:1000px;margin:0 auto;padding:20px}.dashboard{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:20px 0}.card{background:white;padding:20px;border-radius:10px;box-shadow:0 2px 4px rgba(0,0,0,0.1)}.add-friend{background:#42b883;padding:15px;border-radius:10px;margin:20px 0}.add-friend input{padding:10px;margin:5px;border:1px solid #ddd;border-radius:5px;width:200px}.add-friend button{padding:10px 20px;background:#42b883;color:white;border:none;border-radius:5px;cursor:pointer}.friends-list{background:white;padding:20px;border-radius:10px;margin:20px 0}.friend-item{padding:10px;margin:5px 0;background:#f8f9fa;border-radius:5px;display:flex;justify-content:space-between}.graph{width:100%;height:300px;background:#f8f9fa;border-radius:10px;position:relative;margin:10px 0}.node{width:60px;height:60px;border-radius:50%;background:#667eea;color:white;position:absolute;display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer}.node:hover{transform:scale(1.1);transition:transform 0.3s}</style></head><body><div class='header'><h1>Welcome " + var3 + "!</h1><p>Friends Network Dashboard</p></div><div class='container'><div class='add-friend'><h3 style='color:white'>Add New Friend</h3><form action='/add-friend' method='post'><input type='text' name='friend' placeholder='Friend Username' required><button type='submit'>Add Friend</button></form></div><div class='dashboard'><div class='card'><h3>Your Friends</h3><div id='friends-list'>" + getFriendsList(var3) + "</div></div><div class='card'><h3>Network Stats</h3><p>Total Friends: <strong>" + FriendsService.getFriends(var3).size() + "</strong></p><p>Network Size: <strong>" + FriendsService.getAllUsers().size() + "</strong></p><button onclick='location.reload()' style='padding:10px 20px;background:#667eea;color:white;border:none;border-radius:5px;cursor:pointer'>Refresh</button></div></div><div class='card'><h3>Friends Graph</h3><div class='graph'>" + generateGraph() + "</div></div></div></body></html>";
+            var0x.getResponseHeaders().set("Content-Type", "text/html");
+            var0x.sendResponseHeaders(200, (long)var4.getBytes().length);
+            var0x.getResponseBody().write(var4.getBytes());
+            var0x.getResponseBody().close();
+         }
+
+      });
+      var1.createContext("/add-friend", (var0x) -> {
+         if ("POST".equals(var0x.getRequestMethod())) {
+            BufferedReader var1 = new BufferedReader(new InputStreamReader(var0x.getRequestBody()));
+            String var2 = var1.readLine();
+            String var3 = var2.split("=")[1].replace("+", " ");
+            FriendsService.addFriendship(currentUser, var3);
+            var0x.getResponseHeaders().set("Location", "/login");
+            var0x.sendResponseHeaders(302, 0L);
+            var0x.getResponseBody().close();
+         }
+
+      });
+      var1.setExecutor((Executor)null);
+      var1.start();
+      System.out.println("Friends Dashboard running at: http://localhost:8080");
+   }
+
+   private static String getFriendsList(String var0) {
+      Set var1 = FriendsService.getFriends(var0);
+      StringBuilder var2 = new StringBuilder();
+      if (var1.isEmpty()) {
+         var2.append("<p>No friends yet. Add some friends!</p>");
+      } else {
+         Iterator var3 = var1.iterator();
+
+         while(var3.hasNext()) {
+            String var4 = (String)var3.next();
+            var2.append("<div class='friend-item'>").append("<span>").append(var4).append("</span>").append("<small>Connected</small>").append("</div>");
+         }
+      }
+
+      return var2.toString();
+   }
+
+   private static String generateGraph() {
+      List var0 = FriendsService.getAllUsers();
+      StringBuilder var1 = new StringBuilder();
+      short var2 = 200;
+      short var3 = 150;
+      byte var4 = 100;
+
+      for(int var5 = 0; var5 < var0.size(); ++var5) {
+         double var6 = (double)(var5 * 2) * Math.PI / (double)var0.size();
+         int var8 = (int)((double)var2 + (double)var4 * Math.cos(var6)) - 30;
+         int var9 = (int)((double)var3 + (double)var4 * Math.sin(var6)) - 30;
+         var1.append("<div class='node' style='left:").append(var8).append("px;top:").append(var9).append("px' onclick='alert(\"User: ").append((String)var0.get(var5)).append("\")'").append(">").append((String)var0.get(var5)).append("</div>");
+      }
+
+      return var1.toString();
+   }
+}
