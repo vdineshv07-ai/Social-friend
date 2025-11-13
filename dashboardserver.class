@@ -1,0 +1,38 @@
+// Source code is decompiled from a .class file using FernFlower decompiler (from Intellij IDEA).
+package backend;
+
+import com.sun.net.httpserver.HttpServer;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.util.concurrent.Executor;
+
+public class DashboardServer {
+   private HttpServer server;
+   private final int port;
+
+   public DashboardServer(int var1) {
+      this.port = var1;
+   }
+
+   public void start() throws IOException {
+      this.server = HttpServer.create(new InetSocketAddress(this.port), 0);
+      this.server.createContext("/api/friends", new FriendsHandler());
+      this.server.createContext("/dashboard", new DashboardHandler());
+      this.server.createContext("/", new MainHandler());
+      this.server.setExecutor((Executor)null);
+      this.server.start();
+      System.out.println("Dashboard server started on http://localhost:" + this.port);
+   }
+
+   public static void main(String[] var0) {
+      try {
+         DashboardServer var1 = new DashboardServer(8080);
+         var1.start();
+         System.out.println("Friends Network Dashboard running at http://localhost:8080");
+         Thread.currentThread().join();
+      } catch (InterruptedException | IOException var2) {
+         System.err.println("Error: " + var2.getMessage());
+      }
+
+   }
+}
