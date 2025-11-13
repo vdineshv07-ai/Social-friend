@@ -1,0 +1,52 @@
+// Source code is decompiled from a .class file using FernFlower decompiler (from Intellij IDEA).
+package backend;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+public class FriendsService {
+   private static final Map<String, Set<String>> friendsGraph = new HashMap();
+
+   public FriendsService() {
+   }
+
+   public static synchronized boolean addFriendship(String var0, String var1) {
+      if (var0 != null && var1 != null && !var0.equals(var1)) {
+         ((Set)friendsGraph.computeIfAbsent(var0, (var0x) -> {
+            return new HashSet();
+         })).add(var1);
+         ((Set)friendsGraph.computeIfAbsent(var1, (var0x) -> {
+            return new HashSet();
+         })).add(var0);
+         return true;
+      } else {
+         return false;
+      }
+   }
+
+   public static synchronized Map<String, Set<String>> getAllFriendships() {
+      return new HashMap(friendsGraph);
+   }
+
+   public static synchronized List<String> getAllUsers() {
+      return new ArrayList(friendsGraph.keySet());
+   }
+
+   public static synchronized Set<String> getFriends(String var0) {
+      return new HashSet((Collection)friendsGraph.getOrDefault(var0, new HashSet()));
+   }
+
+   static {
+      addFriendship("Alice", "Bob");
+      addFriendship("Alice", "Charlie");
+      addFriendship("Bob", "David");
+      addFriendship("Charlie", "Eve");
+      addFriendship("David", "Frank");
+      addFriendship("Eve", "Alice");
+   }
+}
